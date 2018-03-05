@@ -1,5 +1,6 @@
 package com.taotao.service.Impl;
 
+import com.sun.webkit.dom.EntityImpl;
 import com.taotao.mapper.TbContentCategoryMapper;
 import com.taotao.pojo.TbContentCategory;
 import com.taotao.pojo.TbContentCategoryExample;
@@ -38,7 +39,7 @@ public class ContentCategoryServiceImpl implements ContentCategoryService {
     }
 
     @Override
-    public TaotaoResult addContentCategory(Long patentId, String name) {
+    public TaotaoResult addContentCategory(Long parentId, String name) {
         //补全category信息
         TbContentCategory category = new TbContentCategory();
         Date date = new Date();
@@ -48,16 +49,57 @@ public class ContentCategoryServiceImpl implements ContentCategoryService {
         category.setIsParent(false);
         //设置排序号
         category.setSortOrder(1);
-        return null;
+        //1为正常，2为删除
+        category.setStatus(1);
+        category.setParentId(parentId);
+        tbContentCategoryMapper.insertSelective(category);
+        //更新父类状态
+        TbContentCategory parent = new TbContentCategory();
+        parent.setId(parentId);
+        parent.setIsParent(true);
+        //修改父节点状态为isParents
+        tbContentCategoryMapper.updateByPrimaryKeySelective(parent);
+        return TaotaoResult.ok(category);
     }
 
     @Override
     public TaotaoResult deleteContentCategory(Long id) {
-        return null;
+        //调用删除节点函数
+        TbContentCategory category = tbContentCategoryMapper.selectByPrimaryKey(id);
+        deleteByMeth(id);
+        //如果parentid 没有子节点，则把parentid 设置为子节点
+        TbContentCategoryExample example = new TbContentCategoryExample();
+        example.createCriteria().andParentIdEqualTo(category.getParentId());
+        List<TbContentCategory> tbContentCategories = tbContentCategoryMapper.selectByExample(example);
+        if (tbContentCategories.isEmpty()) {
+            TbContentCategory entity = new TbContentCategory();
+            entity.setId(category.getParentId());
+            entity.setIsParent(false);
+            tbContentCategoryMapper.updateByPrimaryKeySelective(entity);
+        }
+        return  TaotaoResult.ok();
     }
 
+    public void   deleteByMeth(Long id) {
+        //查询该节点下的子节点
+        TbContentCategoryExample example = new TbContentCategoryExample();
+        example.createCriteria().andParentIdEqualTo(id);
+        List<TbContentCategory> categories = tbContentCategoryMapper.selectByExample(example);
+        //节点下的子节点数为0，删除该节点
+        if (!categories.isEmpty()) {
+            for (TbContentCategory entity:categories
+                    ) {
+                deleteByMeth(entity.getId());
+            }
+        }
+        tbContentCategoryMapper.deleteByPrimaryKey(id);
+    }
     @Override
     public TaotaoResult updateName(Long id, String name) {
-        return null;
+        TbContentCategory entity = new TbContentCategory();
+        entity.setId(id);
+        entity.setName(name);
+        tbContentCategoryMapper.updateByPrimaryKeySelective(entity);
+        return TaotaoResult.ok();
     }
 }
