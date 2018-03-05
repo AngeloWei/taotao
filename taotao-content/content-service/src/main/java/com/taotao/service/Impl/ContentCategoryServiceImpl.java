@@ -48,7 +48,14 @@ public class ContentCategoryServiceImpl implements ContentCategoryService {
         category.setIsParent(false);
         //设置排序号
         category.setSortOrder(1);
-        return null;
+        //插入该节点,mapper文件已经做了相关配置
+        tbContentCategoryMapper.insertSelective(category);
+        //查询父节点,isParents修改为true
+        TbContentCategory parent = new TbContentCategory();
+        parent.setId(patentId);
+        parent.setIsParent(true);
+        tbContentCategoryMapper.updateByPrimaryKeySelective(parent);
+        return TaotaoResult.ok(category);
     }
 
     @Override
