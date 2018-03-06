@@ -13,6 +13,10 @@
     <artifactId>commen-utils</artifactId>
     <!-- 依赖工具类的jar包 -->
     <dependencies>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
         <!-- 时间操作组件 -->
         <dependency>
             <groupId>joda-time</groupId>

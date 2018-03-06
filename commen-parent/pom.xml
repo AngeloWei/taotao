@@ -12,7 +12,7 @@
         <module>../taotao-web</module>
         <module>../commen-utils</module>
         <module>../taotao-content</module>
-        <module>../taotao-port-web</module>
+        <module>../taotao-portal-web</module>
     </modules>
     <packaging>pom</packaging>
     <properties>
@@ -44,10 +44,16 @@
         <activemq.version>5.11.2</activemq.version>
         <freemarker.version>2.3.23</freemarker.version>
         <quartz.version>2.2.2</quartz.version>
+        <fastjson.veresion>1.2.44</fastjson.veresion>
     </properties>
     <dependencyManagement>
         <dependencies>
-
+            <!--fastjson-->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.veresion}</version>
+            </dependency>
             <!-- 时间操作组件 -->
             <dependency>
                 <groupId>joda-time</groupId>
