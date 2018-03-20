@@ -1,10 +1,11 @@
 package com.taotao.service.dao;
 
-import com.taotao.service.SearchService;
+
 import com.taotao.utils.SearchItem;
 import com.taotao.utils.SearchResult;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -23,7 +24,7 @@ import java.util.Map;
 @Repository
 public class SearchDao {
     @Autowired
-    private SolrServer solrServer;
+    private SolrClient solrServer;
 
     public SearchResult SearchByQuery(SolrQuery query)throws  Exception {
         //根据query查询索引库
@@ -37,10 +38,10 @@ public class SearchDao {
         for (SolrDocument document :documentList
                 ) {
                 SearchItem item = new SearchItem();
-                item.setId((Long) document.get("id"));
+                item.setId(Long.parseLong(document.get("id").toString()));
                 item.setCategoryName((String) document.get("item_category_name"));
                 item.setImage((String) document.get("item_image"));
-                item.setPrice((Long) document.get("item_price"));
+                item.setPrice(Long.parseLong(document.get("item_price").toString()));
                 //获取关键字高亮
                 List<String> stringList = highlighting.get(document.get("id")).get("item_sell_point");
             if (stringList != null && stringList.size() > 0) {
@@ -55,7 +56,7 @@ public class SearchDao {
         SearchResult result =new SearchResult();
         //将结果封装到SearchResult
         result.setSearchItemList(list);
-        result.setRecordCount(documentList.size());
+        result.setRecordCount((int) documentList.getNumFound());
         return  result;
     }
 }

@@ -1,17 +1,16 @@
 package com.taotao.service;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.taotao.utils.SearchItem;
 import com.taotao.utils.SearchResult;
 import com.taotao.utils.TaotaoResult;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
-
-import java.io.IOException;
-import java.util.List;
 
 public interface SearchService {
-    TaotaoResult getItemList() throws IOException, SolrServerException;
+
+    TaotaoResult getItemList() ;
 
     SearchResult resultQuery(String queryString ,int rows,int page);
+
+    TaotaoResult addDocument(long id);
 
 }

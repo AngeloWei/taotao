@@ -8,11 +8,13 @@ import com.taotao.pojo.TbItem;
 import com.taotao.pojo.TbItemDesc;
 import com.taotao.pojo.TbItemExample;
 import com.taotao.service.ItemService;
-import com.taotao.utils.EasyUiResult;
-import com.taotao.utils.IdUtils;
-import com.taotao.utils.TaotaoResult;
+import com.taotao.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
+
+import javax.jms.*;
 
 import java.util.Date;
 import java.util.List;
@@ -24,6 +26,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private TbItemDescMapper tbItemDescMapper;
+
+    @Autowired
+    private Destination topicDestination;
+    @Autowired
+    private JmsTemplate jmsTemplate;
 
     /**
      * @param item
@@ -50,6 +57,15 @@ public class ItemServiceImpl implements ItemService {
         tbItemDesc.setUpdated(date);
         tbItemDesc.setItemDesc(desc);
         tbItemDescMapper.insert(tbItemDesc);
+        //activeMq消息队列，通知添加商品，更新索引库
+        jmsTemplate.send(topicDestination, new MessageCreator() {
+            @Override
+            public Message createMessage(Session session) throws JMSException {
+                TextMessage textMessage = session.createTextMessage(id + "");
+                return textMessage;
+            }
+        });
+
         return TaotaoResult.ok();
 
     }
