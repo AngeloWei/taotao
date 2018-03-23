@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:dobbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+       http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+
+    <context:component-scan base-package="com.taotao.item.controllor" />
+    <!--加载配置文件，获取参数-->
+    <context:property-placeholder location="classpath:/properties/common.properties"/>
+
+    <!--配置freewarker对象-->
+    <bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <property name="templateLoaderPath" value="/WEB-INF/ftl" />
+        <property name="defaultEncoding" value="utf-8"/>
+    </bean>
+    <mvc:annotation-driven />
+    <!--配置视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+    <!--配置activeMQ-->
+    <!--配置目标jms对象-->
+    <bean id="targetConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://192.168.2.128:61616"/>
+    </bean>
+    <!--spring获取工厂对象，并管理-->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
+        <property name="targetConnectionFactory" ref="targetConnectionFactory"/>
+    </bean>
+
+    <!--producter配置-->
+    <!--加载jsmTemplate对象，可以进行消息发送和接收-->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+    <!-- 在容器中配置destination对象-->
+    <!--queue队列detination,进行点对点传输-->
+    <bean id="queueDestination" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg name="name" value="test-queue"/>
+    </bean>
+    <!--Topic目的地，进行一对多传输-->
+    <bean id="topicDestination" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg name="name" value="item-change-topic"/>
+    </bean>
+
+    <!--配置consumer消息监听器-->
+    <bean id="myMessageListener" class="com.taotao.item.listener.ItemAndMessageListener"/>
+    <!--配置消息监听容器-->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" >
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="topicDestination"/>
+        <property name="messageListener" ref="myMessageListener"/>
+    </bean>
+
+    <!--使用webServlet 处理静态资源 或者添加资源映射标签 <mvc:resources location="/WEB-INF/js/" mapping="/js/**"/>-->
+    <mvc:default-servlet-handler/>
+    <!--应用dubbo服务相关配置-->
+    <dubbo:application name="taotao-web"/>
+    <!--配置zookeeper注册中心地址-->
+    <dubbo:registry protocol="zookeeper" address="192.168.2.128:2181" />
+    <!--配置应用接口-->
+    <dubbo:reference interface="com.taotao.service.ItemService" id="itemService"/>
+</beans>
