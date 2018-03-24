@@ -1,6 +1,7 @@
 package com.taotao.service;
 
 import com.taotao.pojo.TbItem;
+import com.taotao.pojo.TbItemDesc;
 import com.taotao.utils.EasyUiResult;
 import com.taotao.utils.TaotaoResult;
 
@@ -18,4 +19,7 @@ public interface ItemService {
     TaotaoResult deleteItems(List<Long> ids);
 
     TaotaoResult changeStatus(List<Long> ids,short status);
+
+    TbItemDesc getItemDescById(long itemId);
+
 }

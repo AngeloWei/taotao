@@ -1,6 +1,8 @@
 package com.taotao.utils;
 
-public class SearchItem {
+import java.io.Serializable;
+
+public class SearchItem implements Serializable{
     private Long id;
     private String sellPoint;
     private Long price;

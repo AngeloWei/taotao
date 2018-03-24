@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class SearchSynchroController {
-    @Autowired
+   /* @Autowired
     private SearchService searchService;
     @RequestMapping("/solr/indexSynchro")
     @ResponseBody
-    public TaotaoResult SearchIndexSynchro() {
+    public TaotaoResult SearchIndexSynchro() throws  Exception{
         return searchService.getItemList();
-    }
+    }*/
 }

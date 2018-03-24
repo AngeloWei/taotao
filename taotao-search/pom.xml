@@ -16,12 +16,6 @@
     </modules>
     <artifactId>taotao-search</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.solr</groupId>
-            <artifactId>solr-solrj</artifactId>
-        </dependency>
-    </dependencies>
     <!--maven 的tomcat启动插件-->
     <build>
         <plugins>

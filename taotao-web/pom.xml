@@ -9,7 +9,6 @@
         <relativePath>../commen-parent/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>taotao-web</artifactId>
     <packaging>war</packaging>
     <dependencies>

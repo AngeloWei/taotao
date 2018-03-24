@@ -7,10 +7,11 @@ import com.taotao.service.mapper.SearchItemMapper;
 import com.taotao.utils.SearchItem;
 import com.taotao.utils.SearchResult;
 import com.taotao.utils.TaotaoResult;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.zookeeper.data.Id;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ public class SearchServiceImpl implements SearchService {
     @Autowired
     private SearchItemMapper searchItemMpper;
     @Autowired
-    private SolrServer solrServer;
+    private SolrClient solrServer;
     @Autowired
     private SearchDao searchDao;
 
@@ -96,6 +97,28 @@ public class SearchServiceImpl implements SearchService {
         return result;
     }
 
+    @Override
+    public TaotaoResult addDocument(long id) {
+        SearchItem item = searchItemMpper.getSearchItem(id);
+        SolrInputDocument document = new SolrInputDocument();
+        document.addField("id", item.getId());
+        document.addField("item_title", item.getTitle());
+        document.addField("item_desc", item.getItemDesc());
+        document.addField("item_sell_point", item.getSellPoint());
+        document.addField("item_category_name", item.getCategoryName());
+        document.addField("item_price", item.getPrice());
+        document.addField("item_image", item.getImage());
+
+        try {
+            solrServer.add(document);
+            solrServer.commit();
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return TaotaoResult.ok();
+    }
 
 
 }

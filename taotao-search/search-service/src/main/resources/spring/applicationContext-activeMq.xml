@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!--配置solr的单机版 solrj 7.2.1 已经没有-->
+    <!--<bean id="builder" class="org.apache.solr.client.solrj.impl.HttpSolrClient.Builder" >
+        <constructor-arg name="baseSolrUrl" value="http://192.168.2.129:8080/solr/core1" />
+    </bean>
+    <bean id="solrServer" class="org.apache.solr.client.solrj.impl.HttpSolrClient">
+        <constructor-arg name="builder" ref="builder"/>
+    </bean>-->
+    <!--配置solr集群-->
+    <!--配置buidler-->
+    <!--<bean id="builderFactory" class="org.apache.solr.client.solrj.impl.CloudSolrClient.Builder"/>
+    <bean id="builder" factory-bean="builderFactory" factory-method="withZkHost">
+        <constructor-arg value="192.168.2.128:2281,192.168.2.129:2281,192.168.2.129:2282" type="java.lang.String"/>
+    </bean>
+    <bean id="solrServer" factory-bean="builder" factory-method="build">
+        <property name="defaultCollection" value="collection2"/>
+    </bean>-->
+    <!--配置目标jms对象-->
+    <bean id="targetConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://192.168.2.128:61616"/>
+    </bean>
+    <!--spring获取工厂对象，并管理-->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
+        <property name="targetConnectionFactory" ref="targetConnectionFactory"/>
+    </bean>
+
+    <!--producter配置-->
+    <!--加载jsmTemplate对象，可以进行消息发送和接收-->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+    <!-- 在容器中配置destination对象-->
+    <!--queue队列detination,进行点对点传输-->
+    <bean id="queueDestination" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg name="name" value="test-queue"/>
+    </bean>
+    <!--Topic目的地，进行一对多传输-->
+    <bean id="topicDestination" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg name="name" value="item-change-topic"/>
+    </bean>
+
+    <!--配置consumer消息监听器-->
+    <bean id="myMessageListener" class="com.taotao.service.listener.MyMessageListener"/>
+    <!--配置消息监听容器-->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" >
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="topicDestination"/>
+        <property name="messageListener" ref="myMessageListener"/>
+    </bean>
+
+</beans>
