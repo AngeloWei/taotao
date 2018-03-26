@@ -14,8 +14,6 @@ public class AccountServiceImpl implements AccountService{
     @Autowired
     private TbUserMapper tbUserMapper;
 
-
-
     @Override
     public TaotaoResult checkData(String parame, int type) {
         TbUserExample example = new TbUserExample();
@@ -39,7 +37,7 @@ public class AccountServiceImpl implements AccountService{
 
     @Override
     public TaotaoResult userLogin(String account, String passwd) {
-        
+
 
         return null;
     }
